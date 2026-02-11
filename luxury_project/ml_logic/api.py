@@ -13,3 +13,5 @@ def get_exchange_rates(base_currency="EUR"):
     else:
         print("❌ Erreur API")
         return None
+    
+

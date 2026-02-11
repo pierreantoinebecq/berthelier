@@ -8,5 +8,6 @@ services:
     environment:
       # 🔑 This tells Google Cloud libraries where to find the key
       - GOOGLE_APPLICATION_CREDENTIALS=/secrets/gcp-key.json
-      - PROJECT_ID=edhec-01           # Or your specific project ID
+      - PROJECT_ID=${PROJECT_ID}   
+      - DATASET_ID=${DATASET_ID}
     command: tail -f /dev/null        # Keeps container running so you can enter it
