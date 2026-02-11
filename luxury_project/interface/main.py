@@ -45,7 +45,7 @@ def run_full_pipeline():
     print("\n--- 3. Entraînement du Modèle ---")
     
     # Sélection des features business
-    features_list = ['material', 'size', 'type', 'collection']
+    features_list = ['material', 'size', 'type', 'currency']
     
     # On remplit les trous pour éviter que le modèle plante (ex: collection manquante)
     X = df[features_list].fillna('Unknown')
@@ -62,7 +62,7 @@ def run_full_pipeline():
     evaluate_model(model, X_processed, y)
 
     # ---------------------------------------------------------
-    # 4. BUSINESS INTELLIGENCE (Coefficients)
+    # 4. BUSINESS INTELLIGENCE 
     # ---------------------------------------------------------
     print("\n--- 4. Extraction des Drivers de Prix ---")
     df_coefficients = get_coefficients(model, encoder)
@@ -73,7 +73,7 @@ def run_full_pipeline():
     print(df_coefficients.head(3))
 
     # ---------------------------------------------------------
-    # 5. SAUVEGARDE BIGQUERY (Pour PowerBI)
+    # 5. SAUVEGARDE BIGQUERY 
     # ---------------------------------------------------------
     print("\n--- 5. Sauvegarde des résultats ---")
     

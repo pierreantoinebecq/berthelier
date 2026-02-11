@@ -5,13 +5,27 @@ from sklearn.preprocessing import OneHotEncoder
 
 def clean_data(df: pd.DataFrame) -> pd.DataFrame:
     """
-    Nettoyage de base : retire les lignes sans prix.
+    Nettoyage Drastique :
+    1. Retire les lignes sans prix.
+    2. Retire les items "Unknown" ou "Other" qui ne sont pas des sacs.
     """
+    initial_count = len(df)
+    
+    # 1. On vire les NaN sur le prix
     df = df.dropna(subset=['price'])
+    
+    if 'material' in df.columns and 'type' in df.columns:
+        # On supprime ce qui n'a ni matière ni type identifié (ce sont souvent des accessoires mal parsés)
+        # Condition : Garder si (Material OU Type est connu)
+        df = df[
+            (df['material'] != 'Unknown') | 
+            (df['type'] != 'Other')
+        ]
+        
+    final_count = len(df)
+    print(f"🧹 Nettoyage : {initial_count} -> {final_count} lignes ({initial_count - final_count} supprimées)")
+    
     return df
-
-import pandas as pd
-import re
 
 def extract_features_from_url(url):
     """
@@ -124,7 +138,7 @@ def preprocess_data(df: pd.DataFrame) -> pd.DataFrame:
     print(f"🛠️ Début du pré-traitement sur {len(df)} lignes...")
     
     # 1. Nettoyage basique
-    df = clean_data(df)
+    df = df.dropna(subset=['price'])
 
     # 2. Feature Engineering depuis l'URL
     if 'url' in df.columns:
@@ -134,8 +148,10 @@ def preprocess_data(df: pd.DataFrame) -> pd.DataFrame:
         df['material'] = df['material'].fillna('Unknown')
     else:
         print("❌ Colonne 'url' manquante, pas d'enrichissement possible.")
+    
+    df = clean_data(df)
 
-    print("✅ Pré-traitement terminé.")
+    print(f"✅ Pré-traitement terminé. Reste : {len(df)} lignes qualifiées.")
     return df
 
 def preprocess_features(X: pd.DataFrame):

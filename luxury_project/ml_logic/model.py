@@ -1,5 +1,5 @@
 from sklearn.linear_model import LinearRegression, Ridge
-from sklearn.metrics import mean_squared_error, r2_score
+from sklearn.metrics import mean_squared_error, mean_absolute_error, r2_score, mean_absolute_percentage_error
 import pandas as pd
 import numpy as np
 
@@ -28,11 +28,28 @@ def evaluate_model(model, X, y):
     # Metrics
     mse = mean_squared_error(y, y_pred)
     rmse = np.sqrt(mse)
+    mae = mean_absolute_error(y, y_pred)
+    mape = mean_absolute_percentage_error(y, y_pred)
+
     r2 = r2_score(y, y_pred)
     
-    print(f"✅ Model Evaluated:")
-    print(f"   - RMSE: {rmse:.2f} (Average error in Price)")
-    print(f"   - R2: {r2:.4f} (Explains {r2*100:.1f}% of variance)")
+    print(f"✅ Évaluation Globale :")
+    print(f"   - RMSE (Sensible aux extrêmes): {rmse:.0f} €")
+    print(f"   - MAE (Erreur moyenne réelle): {mae:.0f} €")
+    print(f"   - MAPE (Erreur en %): {mape*100:.1f} %")
+    print(f"   - R2: {r2:.4f}")
+
+    # --- ANALYSE DE SEGMENT ---
+    # On crée un petit DF temporaire pour analyser les erreurs
+    df_results = pd.DataFrame({'Actual': y, 'Predicted': y_pred})
+    df_results['Error'] = df_results['Actual'] - df_results['Predicted']
+    
+    # On regarde uniquement les produits "normaux" (< 5000 €)
+    mask_normal = df_results['Actual'] < 5000
+    if mask_normal.sum() > 0:
+        mae_normal = mean_absolute_error(df_results[mask_normal]['Actual'], df_results[mask_normal]['Predicted'])
+        print(f"\n Focus sur les prix 'normaux' (< 5 000 €) :")
+        print(f"   - Sur ces {mask_normal.sum()} produits, l'erreur moyenne est de : {mae_normal:.0f} €")
     
     return rmse, r2
 
