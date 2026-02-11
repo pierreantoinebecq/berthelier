@@ -2,14 +2,14 @@ import pandas as pd
 from google.cloud import bigquery
 from pathlib import Path
 
-# On importe tes variables de config (Le Réceptionniste)
+# On importe les variables de configuration 
 from luxury_project.params import PROJECT_ID, DATASET_ID, TABLE_ID, brand
 
 def get_data(brand=brand):
     """
-    Récupère les données depuis la table Source (celle du prof)
+    On récupère les données depuis la table Source 
     """
-    print(f"📥 Chargement des données pour {brand}...")
+    print(f"Chargement des données pour {brand}...")
     
     # 1. Utilisation des variables params.py 
     query = f"""
@@ -22,23 +22,23 @@ def get_data(brand=brand):
     try:
         client = bigquery.Client()
         df = client.query(query).to_dataframe()
-        print(f"✅ {len(df)} lignes chargées depuis BigQuery.")
+        print(f"{len(df)} lignes chargées depuis BigQuery.")
         return df
         
     except Exception as e:
-        print("❌ Erreur de connexion BigQuery. Vérifie tes secrets Docker.")
+        print("Erreur de connexion BigQuery.")
         raise e
 
 def load_data_to_bq(df, table_name, replace=True):
     """
-    Sauvegarde le DataFrame dans TON projet BigQuery
+    On sauvegarde le DataFrame dans notre projet BigQuery
     """
-    print(f"💾 Préparation de la sauvegarde vers {table_name}...")
+    print(f"Préparation de la sauvegarde vers {table_name}...")
 
-    # On utilise TON projet (défini dans .env -> docker -> params.py)
+    # On utilise notre projet (défini dans .env -> docker -> params.py)
     client = bigquery.Client(project=PROJECT_ID)
     
-    # La cible : TON_PROJET.TON_DATASET.TA_NOUVELLE_TABLE
+    # La cible 
     table_ref = f"{PROJECT_ID}.{DATASET_ID}.{table_name}"
     
     # Si replace=True, on écrase la table existante (WRITE_TRUNCATE)
@@ -48,10 +48,10 @@ def load_data_to_bq(df, table_name, replace=True):
     try:
         job = client.load_table_from_dataframe(df, table_ref, job_config=job_config)
         job.result()  # On attend que ça finisse
-        print(f"✅ Sauvegarde terminée avec succès dans {table_ref}.")
+        print(f"Sauvegarde terminée avec succès dans {table_ref}.")
         
     except Exception as e:
-        print(f"❌ Erreur lors de l'écriture dans BigQuery : {e}")
+        print(f"Erreur lors de l'écriture dans BigQuery : {e}")
         raise e
 
 if __name__ == "__main__":
