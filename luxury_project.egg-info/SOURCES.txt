@@ -1,8 +1,0 @@
-setup.py
-luxury_project.egg-info/PKG-INFO
-luxury_project.egg-info/SOURCES.txt
-luxury_project.egg-info/dependency_links.txt
-luxury_project.egg-info/requires.txt
-luxury_project.egg-info/top_level.txt
-my_package/__init__.py
-my_package/data_loader.py
