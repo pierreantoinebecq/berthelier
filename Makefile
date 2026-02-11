@@ -1,8 +1,8 @@
-# Démarrer tout et voir les logs (Le bouton ON)
+# Démarrer tout et voir les logs 
 up:
 	docker compose up --build
 
-# Démarrer en arrière-plan (Le mode silencieux)
+# Démarrer en arrière-plan 
 up_d:
 	docker compose up --build -d
 
@@ -10,7 +10,7 @@ up_d:
 down:
 	docker compose down
 
-# Entrer dans le conteneur pour taper des commandes (Le mode hacker)
+# Entrer dans le conteneur pour taper des commandes
 shell:
 	docker compose exec app /bin/bash
 
@@ -18,6 +18,6 @@ shell:
 test:
 	docker compose exec app python test.py
 
-# Lancer un notebook Jupyter (Le mode data science)
+# Lancer un notebook Jupyter 
 notebook:
 	docker compose exec app jupyter notebook --ip 0.0.0.0 --port 8888 --no-browser --allow-root

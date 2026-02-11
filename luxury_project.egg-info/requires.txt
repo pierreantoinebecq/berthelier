@@ -1,6 +1,0 @@
-pandas
-google-cloud-bigquery
-google-cloud-bigquery-storage
-db-dtypes
-requests
-ipykernel
