@@ -2,6 +2,8 @@ services:
   app:
     build: .
     container_name: luxury_app
+    ports:
+      - "8888:8888"
     volumes:
       - .:/app                        # Live code reloading
       - ./secrets:/secrets:ro         # Mount secrets read-only

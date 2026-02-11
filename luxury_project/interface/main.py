@@ -2,67 +2,97 @@ import pandas as pd
 from luxury_project.ml_logic.data import get_data, load_data_to_bq
 from luxury_project.ml_logic.api import get_exchange_rates
 from luxury_project.params import brand
+from luxury_project.ml_logic.preprocessor import preprocess_data, preprocess_features
+from luxury_project.ml_logic.model import initialize_model, train_model, evaluate_model, get_coefficients
 
-def etl_pipeline():
-    print(f"Démarrage du pipeline ETL pour la marque : {brand}...")
+def run_full_pipeline():
+    print(f"🚀 Démarrage du pipeline complet pour : {brand}")
 
     # ---------------------------------------------------------
-    # 1. EXTRACTION (Données existantes BigQuery)
+    # 1. EXTRACTION & PRÉ-TRAITEMENT (URL + Cleaning)
     # ---------------------------------------------------------
-    print("--- 1. Extraction des données Luxe ---")
-    df_luxury = get_data(brand=brand)
+    print("\n--- 1. Extraction & Feature Engineering ---")
+    df = get_data(brand=brand)
     
-    if df_luxury.empty:
-        print("❌ Aucune donnée trouvée dans la source. Arrêt du pipeline.")
+    if df.empty:
+        print("❌ Stop : Aucune donnée.")
         return
 
+    # On applique ton extracteur d'URL (Matière, Taille, Type...)
+    df = preprocess_data(df)
+
     # ---------------------------------------------------------
-    # 2. ENRICHISSEMENT (API Taux de change)
+    # 2. CONVERSION MONÉTAIRE AVEC L'API
     # ---------------------------------------------------------
-    print("--- 2. Récupération des taux de change (Base EUR) ---")
-    # On récupère les taux : 1 EUR = X Devise
+    print("\n--- 2. Conversion des Devises (Target) ---")
     df_rates = get_exchange_rates(base_currency="EUR")
     
-    # ---------------------------------------------------------
-    # 3. TRANSFORMATION (Fusion & Calculs)
-    # ---------------------------------------------------------
-    print("--- 3. Transformation & Nettoyage ---")
-    
     if df_rates is not None:
-        # On fusionne les données luxe avec les taux sur la colonne 'currency'
-        # 'left' join pour garder toutes les lignes luxe même si on n'a pas le taux
-        df_merged = df_luxury.merge(df_rates, on='currency', how='left')
-        
-        # Calcul : Convertir le prix local en Euros
-        # Formule : Prix EUR = Prix Local / Taux (car 1 EUR = Taux * Devise)
-        df_merged['price_eur'] = df_merged['price'] / df_merged['rate']
-        
-        # Arrondir pour faire propre
-        df_merged['price_eur'] = df_merged['price_eur'].round(2)
-        
-        print(f"✅ Fusion réussie. {len(df_merged)} lignes traitées.")
+        df = df.merge(df_rates, on='currency', how='left')
+        df['price_eur'] = df['price'] / df['rate']
+        df['price_eur'] = df['price_eur'].round(2)
     else:
-        print("⚠️ API indisponible. On continue avec les données brutes.")
-        df_merged = df_luxury
+        print("⚠️ Attention : Pas de taux de change. On suppose que price = EUR (Risqué).")
+        df['price_eur'] = df['price']
 
-    # Petit nettoyage : on garde une copie propre
-    df_cleaned = df_merged.copy()
+    # On retire les lignes où le prix ou la conversion a échoué
+    df = df.dropna(subset=['price_eur'])
+    print(f"✅ Données prêtes : {len(df)} lignes avec Prix en EUR.")
 
     # ---------------------------------------------------------
-    # 4. CHARGEMENT (Vers TON BigQuery)
+    # 3. MACHINE LEARNING (Entraînement)
     # ---------------------------------------------------------
-    print(f"--- 4. Chargement dans BigQuery pour {brand} ---")
+    print("\n--- 3. Entraînement du Modèle ---")
     
-    # On crée un nom de table propre (ex: "louis_vuitton_processed")
-    target_table_name = f"{brand.lower().replace(' ', '_')}_processed"
+    # Sélection des features business
+    features_list = ['material', 'size', 'type', 'collection']
     
-    # On sauvegarde (replace=True écrase la table pour éviter les doublons à chaque test)
-    load_data_to_bq(df_cleaned, table_name=target_table_name, replace=True)
+    # On remplit les trous pour éviter que le modèle plante (ex: collection manquante)
+    X = df[features_list].fillna('Unknown')
+    y = df['price_eur']
+
+    # Encodage (Catégories -> Chiffres)
+    X_processed, encoder = preprocess_features(X)
+
+    # Entraînement
+    model = initialize_model(model_type="linear") 
+    model = train_model(model, X_processed, y)
     
+    # Évaluation (RMSE, R2)
+    evaluate_model(model, X_processed, y)
+
+    # ---------------------------------------------------------
+    # 4. BUSINESS INTELLIGENCE (Coefficients)
+    # ---------------------------------------------------------
+    print("\n--- 4. Extraction des Drivers de Prix ---")
+    df_coefficients = get_coefficients(model, encoder)
+    df_coefficients['brand'] = brand 
+    
+    # Petit aperçu console
+    print("💰 Top 3 Facteurs de Hausse de Prix :")
+    print(df_coefficients.head(3))
+
+    # ---------------------------------------------------------
+    # 5. SAUVEGARDE BIGQUERY (Pour PowerBI)
+    # ---------------------------------------------------------
+    print("\n--- 5. Sauvegarde des résultats ---")
+    
+    # A. Sauvegarde des Prédictions (Table d'Analyse)
+    # On ajoute la prédiction au DF original pour voir les "bonnes affaires" (Undervalued)
+    df['predicted_price'] = model.predict(X_processed)
+    df['valuation_gap'] = df['price_eur'] - df['predicted_price'] # Positif = Cher, Négatif = Bon plan
+    
+    table_analysis = f"{brand.lower().replace(' ', '_')}_data_analysis"
+    load_data_to_bq(df, table_analysis)
+
+    # B. Sauvegarde des Coefficients (Table des Drivers)
+    table_drivers = f"{brand.lower().replace(' ', '_')}_price_drivers"
+    load_data_to_bq(df_coefficients, table_drivers)
+
     print("🏁 Pipeline terminé avec succès !")
 
 if __name__ == '__main__':
     try:
-        etl_pipeline()
+        run_full_pipeline()
     except Exception as e:
-        print(f"❌ Erreur critique dans le pipeline : {e}")
+        print(f"❌ Erreur critique : {e}")
