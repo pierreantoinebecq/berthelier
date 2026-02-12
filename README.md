@@ -98,7 +98,7 @@ Standard metadata is often incomplete. This project uses a custom Regex engine (
 
   - Product Families: Categorizes items into business units (e.g., Keepall, Capucines, SLG).
 
-### 📈 Results
+## 📈 Results
 
 The pipeline outputs to BigQuery. You can visualize the results in Looker Studio or PowerBI connecting to:
 
