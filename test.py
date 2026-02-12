@@ -5,19 +5,17 @@ import os
 from google.cloud import bigquery
 
 def run_test():
-    print("🚀 Démarrage du test...")
+    print("Démarrage du test...")
 
     # On vérifie juste si Docker a bien fait son boulot
     # (Docker a injecté la variable GOOGLE_APPLICATION_CREDENTIALS=/secrets/gcp-key.json)
     if "GOOGLE_APPLICATION_CREDENTIALS" not in os.environ:
-        print("❌ ERREUR CRITIQUE : La variable d'environnement manque !")
+        print("ERREUR CRITIQUE : La variable d'environnement manque !")
         return
 
     try:
-        # MAGIE : On ne donne AUCUN argument. 
-        # La librairie va lire la variable d'environnement toute seule.
         client = bigquery.Client()
-        print(f"✅ Connecté au projet : {client.project}")
+        print(f"Connecté au projet : {client.project}")
         
         query = """
             SELECT brand, count(*) as count
@@ -29,7 +27,7 @@ def run_test():
         print(df)
         
     except Exception as e:
-        print(f"❌ Erreur : {e}")
+        print(f"Erreur : {e}")
 
 if __name__ == "__main__":
     run_test()
