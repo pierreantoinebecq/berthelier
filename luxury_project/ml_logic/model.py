@@ -6,20 +6,18 @@ import numpy as np
 def initialize_model(model_type="linear"):
     """
     Initialize the model.
-    Using Ridge (Linear Regression with regularization) is often safer 
-    to prevent huge coefficients if you have many variables.
     """
     if model_type == "linear":
         model = LinearRegression()
     else:
-        # Ridge is better if you have collinearity (highly correlated features)
+        # Ridge is better if we have collinearity (highly correlated features)
         model = Ridge(alpha=1.0)
     
     return model
 
 def train_model(model, X, y):
     model.fit(X, y)
-    print("✅ Model trained")
+    print("Model trained")
     return model
 
 def evaluate_model(model, X, y):
@@ -33,7 +31,7 @@ def evaluate_model(model, X, y):
 
     r2 = r2_score(y, y_pred)
     
-    print(f"✅ Évaluation Globale :")
+    print(f"Évaluation Globale :")
     print(f"   - RMSE (Sensible aux extrêmes): {rmse:.0f} €")
     print(f"   - MAE (Erreur moyenne réelle): {mae:.0f} €")
     print(f"   - MAPE (Erreur en %): {mape*100:.1f} %")
