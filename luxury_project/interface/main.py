@@ -6,7 +6,7 @@ from luxury_project.ml_logic.preprocessor import preprocess_data, preprocess_fea
 from luxury_project.ml_logic.model import initialize_model, train_model, evaluate_model, get_coefficients
 
 def run_full_pipeline():
-    print(f"🚀 Démarrage du pipeline complet pour : {brand}")
+    print(f"Démarrage du pipeline complet pour : {brand}")
 
     # ---------------------------------------------------------
     # 1. EXTRACTION & PRÉ-TRAITEMENT (URL + Cleaning)
@@ -15,10 +15,10 @@ def run_full_pipeline():
     df = get_data(brand=brand)
     
     if df.empty:
-        print("❌ Stop : Aucune donnée.")
+        print("Stop : Aucune donnée.")
         return
 
-    # On applique ton extracteur d'URL (Matière, Taille, Type...)
+    # On applique notre extracteur d'URL (Matière, Taille, Type...)
     df = preprocess_data(df)
 
     # ---------------------------------------------------------
@@ -32,12 +32,12 @@ def run_full_pipeline():
         df['price_eur'] = df['price'] / df['rate']
         df['price_eur'] = df['price_eur'].round(2)
     else:
-        print("⚠️ Attention : Pas de taux de change. On suppose que price = EUR (Risqué).")
+        print("Attention : Pas de taux de change. On suppose que price = EUR (Risqué).")
         df['price_eur'] = df['price']
 
     # On retire les lignes où le prix ou la conversion a échoué
     df = df.dropna(subset=['price_eur'])
-    print(f"✅ Données prêtes : {len(df)} lignes avec Prix en EUR.")
+    print(f"Données prêtes : {len(df)} lignes avec Prix en EUR.")
 
     # ---------------------------------------------------------
     # 3. MACHINE LEARNING (Entraînement)
@@ -69,7 +69,7 @@ def run_full_pipeline():
     df_coefficients['brand'] = brand 
     
     # Petit aperçu console
-    print("💰 Top 3 Facteurs de Hausse de Prix :")
+    print("Top 3 Facteurs de Hausse de Prix :")
     print(df_coefficients.head(3))
 
     # ---------------------------------------------------------
@@ -89,10 +89,10 @@ def run_full_pipeline():
     table_drivers = f"{brand.lower().replace(' ', '_')}_price_drivers"
     load_data_to_bq(df_coefficients, table_drivers)
 
-    print("🏁 Pipeline terminé avec succès !")
+    print("Pipeline terminé avec succès !")
 
 if __name__ == '__main__':
     try:
         run_full_pipeline()
     except Exception as e:
-        print(f"❌ Erreur critique : {e}")
+        print(f"Erreur critique : {e}")
