@@ -40,7 +40,7 @@ def run_full_pipeline():
     print(f"Données prêtes : {len(df)} lignes avec Prix en EUR.")
 
     # ---------------------------------------------------------
-    # 3. MACHINE LEARNING (Entraînement)
+    # 3. MACHINE LEARNING 
     # ---------------------------------------------------------
     print("\n--- 3. Entraînement du Modèle ---")
     

@@ -94,7 +94,7 @@ def extract_features_from_url(url):
             features['material'] = 'Metal/Precious'
         
         # ---------------------------------------------------------
-        # 4. LOGIQUE TYPE (Élargie)
+        # 4. LOGIQUE TYPE 
         # ---------------------------------------------------------
         if 'backpack' in slug_lower: features['type'] = 'Backpack'
         elif 'tote' in slug_lower or 'neverfull' in slug_lower or 'onthego' in slug_lower: features['type'] = 'Tote'
