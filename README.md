@@ -87,7 +87,7 @@ Use the Makefile shortcuts to manage the lifecycle:
       make down
       
 
-##📊 Features & Engineering
+## 📊 Features & Engineering
 ### URL Parsing Logic
 
 Standard metadata is often incomplete. This project uses a custom Regex engine (ml_logic/preprocessor.py) to extract features directly from the product URL slugs.
