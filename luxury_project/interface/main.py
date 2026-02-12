@@ -40,7 +40,7 @@ df = df.dropna(subset=['price_eur'])
 print(f"Data ready: {len(df)} rows with price in EUR.")
 
     # ---------------------------------------------------------
-    # 3. MACHINE LEARNING (Entraînement)
+    # 3. MACHINE LEARNING 
     # ---------------------------------------------------------
     print("\n--- 3. Entraînement du Modèle ---")
     
